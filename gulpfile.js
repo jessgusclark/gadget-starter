@@ -6,9 +6,12 @@ var minifyCSS = require('gulp-minify-css');
 var uglify = require('gulp-uglify');
 var rename = require("gulp-rename");
 
+//for testing:
+var mocha = require('gulp-mocha');
+
 //default task:
-gulp.task('default', ['sass', 'scripts']);
-gulp.task('build', ['sass', 'scripts', 'watch']);
+gulp.task('default', ['sass', 'scripts', 'test', 'watch']);
+gulp.task('build', ['sass', 'scripts', 'test']);
 
 // watchers:
 gulp.task('watch', function() {
@@ -35,4 +38,10 @@ gulp.task('scripts', function() {
     .pipe(uglify())
     .pipe(rename("gadget.min.js"))
     .pipe(gulp.dest('./build/js/'));
+});
+
+gulp.task('test', ['scripts'], function () {
+  return gulp.src('test/*.js', {read: false})
+    // gulp-mocha needs filepaths so you can't have any plugins before it 
+    .pipe(mocha({reporter: 'nyan'}));
 });
