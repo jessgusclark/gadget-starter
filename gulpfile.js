@@ -17,12 +17,12 @@ gulp.task('build', ['sass', 'scripts', 'test']);
 gulp.task('watch', function() {
 
   gulp.watch('source/scss/*.scss', ['sass']);  
-  gulp.watch('source/js/*.js', ['scripts']);
+  gulp.watch(['source/js/*.js', 'test/*.js'], ['scripts', 'test']);
 
 });
 
 gulp.task('sass', function () {
-  gulp.src(['./bower_components/bootstrap/dist/css/bootstrap.min.css', './source/scss/*.scss'])
+  gulp.src(['./source/scss/*.scss'])
     .pipe(sass.sync().on('error', sass.logError))
     .pipe(concat('gadget.css'))
     .pipe(gulp.dest('./build/css/'))
@@ -32,7 +32,7 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-  return gulp.src(['./bower_components/jquery/dist/jquery.js', './source/gadgetlib.js', './source/js/*.js' ])
+  return gulp.src(['./source/js/*.js' ])
     .pipe(concat('gadget.js'))
     .pipe(gulp.dest('./build/js/'))
     .pipe(uglify())
@@ -44,4 +44,10 @@ gulp.task('test', ['scripts'], function () {
   return gulp.src('test/*.js', {read: false})
     // gulp-mocha needs filepaths so you can't have any plugins before it 
     .pipe(mocha({reporter: 'nyan'}));
+});
+
+// test for travis.ci
+gulp.task('test-nocats', ['scripts'], function () {
+  return gulp.src('test/*.js', {read: false})
+    .pipe(mocha());
 });

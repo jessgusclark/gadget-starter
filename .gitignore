@@ -7,8 +7,8 @@ nbproject
 .idea
 .node_history
 
-bower_components
 build/css
 build/js
 
 npm-debug.log
+sftp-config.json

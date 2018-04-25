@@ -1,7 +1,11 @@
 /*
-    gadgetlib.js v1.0.7.1
-    Copyright 2015 OmniUpdate, Inc.
+    gadgetlib.js v1.0.8
+    Copyright 2016 OmniUpdate, Inc.
     http://www.omniupdate.com/
+
+    Changes in 1.0.8:
+      - Refactored Metadata API
+      - Enhanced Metadata console warings for malformed parameters. 
 
     Changes in 1.0.7.1:
       - gadgetlib.min.js is now offered.
@@ -375,40 +379,86 @@
          * @param {string} params.link_type Required if 'link' or 'unlink' actions are called.
          * @return {promise} Ajax promise object.
          *
-         */        
-        gadget : gadget,
-        //Param Validation
-        paramValidation : function (params) {
+         */
+        _request : function(method, resource, action, params, options) {
+            if (!params) { params = {}; }
+            if (!options) { options = {}; }
+            params.action = action;
+            this._paramValidation(params);
+            var ajaxParams = {
+                type     : method, 
+                dataType : 'json',
+                url      : gadget.apihost + resource,
+                data     : { 
+                    site : params.ou_site || gadget.site,
+                    authorization_token : gadget.token
+                } 
+            };
+            ajaxParams = this._cleanProps(params, ajaxParams);
+            return $.ajax($.extend(ajaxParams, options));
+        },
+        _paramValidation : function (params) {
             if(!params){ throw 'Missing parameters for Metadata API request.'; }
             if (!params.action) { throw 'Missing \'action\' property in options object'; }
-            if ( ((params.action === 'update' || params.action === 'delete' || params.action === 'view') && !params.id) || 
-                 (params.action === 'create' && (!params.mime_type || !params.metadata)) ||
-                 (params.action === 'link' && (!params.item || !params.id) ) || 
-                 (params.action === 'unlink' && !params.item) || 
-                 (params.action === 'grouplink' && (!params.id || !params.groups)) || 
-                 (params.action === 'groupunlink' && (!params.id || !params.groups)) || 
-                 (params.action === 'list' && !params.mime_type)) { 
-                    throw 'Missing required parameter for \'' + params.action + '\' Metadata API request'; 
+            switch(params.action) {
+                case 'create':
+                    if(!params.mime_type || !params.metadata) {
+                        throw 'Missing required parameter \'' + (!params.mime_type ? 'mime_type' : 'metadata') + '\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    break;
+                case 'list':
+                    if(!params.mime_type) {
+                        throw 'Missing required parameter \'mime_type\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    break;
+                case 'link':
+                case 'unlink':
+                    if(!params.item) {
+                        throw 'Missing required parameter \'item\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    if (!params.id) {
+                        throw 'Missing required parameter \'id\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    break;
+                case 'grouplink':
+                case 'groupunlink':
+                    if (!params.groups) {
+                        throw 'Missing required parameter \'groups\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    if (!params.id) {
+                        throw 'Missing required parameter \'id\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    break;
+                case 'update':
+                case 'delete':
+                case 'view':
+                    if (!params.id) {
+                        throw 'Missing required parameter \'id\' for \'' + params.action + '\' Metadata API request'; 
+                    }
+                    break;
+                default:
+                    return;
             }
         },
-        cleanProps : function (params, defaults) {
+        _cleanProps : function (params, defaults) {
             for (var prop in params) {
                 var metadataProp;
                 switch (prop) {
-                    case 'mime_type' : metadataProp = true; break;
-                    case 'metadata' : metadataProp = true; break;
-                    case 'metadatas' : metadataProp = true; break;
-                    case 'scope' : metadataProp = true; break;
-                    case 'groups' : metadataProp = true; break;
-                    case 'item' : metadataProp = true; break;
-                    case 'item_type' : metadataProp = true; break;
-                    case 'id' : metadataProp = true; break;
-                    case 'ids' : metadataProp = true; break;
-                    case 'asset' : metadataProp = true; break;
-                    case 'page' : metadataProp = true; break;
-                    case 'directory' : metadataProp = true; break;
-                    case 'site' : metadataProp = true; break;
-                    case 'ou_site' : metadataProp = true; break;
+                    case 'mime_type':
+                    case 'metadata':
+                    case 'metadatas':
+                    case 'scope':
+                    case 'groups':
+                    case 'item':
+                    case 'item_type':
+                    case 'id':
+                    case 'ids':
+                    case 'asset':
+                    case 'page':
+                    case 'directory':
+                    case 'site':
+                    case 'ou_site': 
+                        metadataProp = true; break;
                     default : metadataProp = false;
                 }
                 if (metadataProp) {
@@ -419,157 +469,31 @@
             return defaults;
         },
         create : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'create';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/new',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/new', 'create', params, options);
         },
         update : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'update';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/save',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/save', 'save', params, options);
         },
         delete : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'delete';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/delete',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/delete', 'delete', params, options);
         },
         list : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'list';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'GET', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/list',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('GET', '/metadata/list', 'list', params, options);
         },
         view : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'view';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'GET', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/view',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('GET', '/metadata/view', 'view', params, options);
         },
         link : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'link';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/'+ params.link_type + 'link',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/'+ params.link_type + 'link', 'link', params, options);
         },
         unlink : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'unlink';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/'+ params.link_type + 'unlink',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/'+ params.link_type + 'unlink', 'unlink', params, options);
         },
         groupLink : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'grouplink';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/grouplink',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/grouplink', 'grouplink', params, options);
         },
         groupUnlink : function (params, options) {
-            if (!params) { params = {}; }
-            if (!options) { options = {}; }
-            params.action = 'groupunlink';
-            this.paramValidation(params);
-            var ajaxParams = {
-                type     : 'POST', 
-                dataType : 'json',
-                url : this.gadget.apihost + '/metadata/groupunlink',
-                data     : { 
-                    site : params.ou_site || this.gadget.site,
-                    authorization_token : this.gadget.token
-                } 
-            };
-            ajaxParams = this.cleanProps(params, ajaxParams);
-            return $.ajax($.extend(ajaxParams, options));
+            return this._request('POST', '/metadata/groupunlink', 'groupunlink', params, options);
         }
     };
 

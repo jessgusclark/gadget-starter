@@ -15,7 +15,7 @@ $(document).ready(function () {
         
         $("#main").addClass( gadget.get('place') );
 
-        $("#status").html("Gadget Loaded.");
+        $("#status").html( demo.helloWorld() );
         
     });
 });
