@@ -17,7 +17,7 @@ gulp.task('build', ['sass', 'scripts', 'test']);
 gulp.task('watch', function() {
 
   gulp.watch('source/scss/*.scss', ['sass']);  
-  gulp.watch('source/js/*.js', ['scripts']);
+  gulp.watch(['source/js/*.js', 'test/*.js'], ['scripts', 'test']);
 
 });
 
