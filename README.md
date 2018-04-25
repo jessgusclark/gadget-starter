@@ -4,7 +4,7 @@ A **modified** skeleton for creating Gadgets for the [OU Campus™ web content m
 
 ## Installing locally
 
-Make sure [npm](https://www.npmjs.com/), [Bower](http://bower.io/), and [Gulp](http://gulpjs.com/) are installed on your machine.
+Make sure [npm](https://www.npmjs.com/), and [Gulp](http://gulpjs.com/) are installed on your machine.
 
 ```
 npm install
