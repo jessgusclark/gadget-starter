@@ -11,3 +11,4 @@ build/css
 build/js
 
 npm-debug.log
+sftp-config.json
