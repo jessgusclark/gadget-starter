@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test-nocats"
   },
   "repository": {
     "type": "git",

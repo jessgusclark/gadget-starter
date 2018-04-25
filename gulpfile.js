@@ -45,3 +45,9 @@ gulp.task('test', ['scripts'], function () {
     // gulp-mocha needs filepaths so you can't have any plugins before it 
     .pipe(mocha({reporter: 'nyan'}));
 });
+
+// test for travis.ci
+gulp.task('test-nocats', ['scripts'], function () {
+  return gulp.src('test/*.js', {read: false})
+    .pipe(mocha());
+});
