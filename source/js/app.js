@@ -17,6 +17,11 @@ $(document).ready(function () {
 
         $("#status").html( demo.helloWorld() );
         
+        $.when( accounts.view() ).done(function(data) {
+            console.log("Accounts.View:", data);
+            $("#status").append("<br/>" + data.institution);
+        });
+
     });
 });
 
