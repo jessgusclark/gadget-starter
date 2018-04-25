@@ -18,6 +18,9 @@
 			}, 100);
 
 			return deferred.promise();
+		},
+		getAccount : function(){
+			return gadget.account;
 		}
 
 	};

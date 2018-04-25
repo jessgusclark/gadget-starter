@@ -1,5 +1,4 @@
 var jsdom = require("jsdom").jsdom;
-var sinon = require('sinon');
 var chai = require("chai");
 var chaiAsPromised = require("chai-as-promised");
 
@@ -12,6 +11,8 @@ chai.use(chaiAsPromised);
 var assert = chai.assert; //require('assert');
 var app = require('../source/js/demo.js');
 
+//stubbed:
+global.gadget = { account : "hello" }
 
 describe('test demo', function() {
 
@@ -26,5 +27,9 @@ describe('test demo', function() {
 	it('should say hurray via a promise', function(){
 		return assert.eventually.equal( app.demo.getPromise(), "hurray" );
 	});
+
+	it('should return global gadget.account from demo', function(){	
+		assert.equal("hello", app.demo.getAccount() );
+	})
 
 });
