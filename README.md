@@ -9,7 +9,5 @@ Make sure [npm](https://www.npmjs.com/), [Bower](http://bower.io/), and [Gulp](h
 ```
 npm install
 
-bower install
-
 gulp build
 ```

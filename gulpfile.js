@@ -22,7 +22,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('sass', function () {
-  gulp.src(['./bower_components/bootstrap/dist/css/bootstrap.min.css', './source/scss/*.scss'])
+  gulp.src(['./source/scss/*.scss'])
     .pipe(sass.sync().on('error', sass.logError))
     .pipe(concat('gadget.css'))
     .pipe(gulp.dest('./build/css/'))
@@ -32,7 +32,7 @@ gulp.task('sass', function () {
 });
 
 gulp.task('scripts', function() {
-  return gulp.src(['./bower_components/jquery/dist/jquery.js', './source/gadgetlib.js', './source/js/*.js' ])
+  return gulp.src(['./source/js/*.js' ])
     .pipe(concat('gadget.js'))
     .pipe(gulp.dest('./build/js/'))
     .pipe(uglify())
