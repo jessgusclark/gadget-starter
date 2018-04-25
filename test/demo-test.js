@@ -9,7 +9,7 @@ var assert = require('chai').assert;
 var app = require('../source/js/demo.js');
 
 
-describe('test ', function() {
+describe('test demo', function() {
 
 	it('should say Hello', function(){
 		assert.equal( app.demo.helloWorld(), "Hello World!" );
