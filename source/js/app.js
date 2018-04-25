@@ -22,6 +22,10 @@ $(document).ready(function () {
             $("#status").append("<br/>" + data.institution);
         });
 
+        $.when( demo.getPromise() ).done(function(data) {
+            console.log("Promise", data);
+        });
+
     });
 });
 

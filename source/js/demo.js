@@ -9,7 +9,16 @@
 	  	},
 	  	byeWorld : function(){
 	  		return goodbyeWorld();
-	  	}
+	  	},
+	  	getPromise : function() {
+			var deferred = $.Deferred();
+
+			setTimeout(function(){
+		    	deferred.resolve("hurray");
+			}, 100);
+
+			return deferred.promise();
+		}
 
 	};
 
@@ -18,7 +27,7 @@
 	function goodbyeWorld(){
 		return "Goodbye!";
 	}
-
+	
    exports.demo = demo;
 
 })(this);
