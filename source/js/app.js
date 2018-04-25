@@ -16,7 +16,16 @@ $(document).ready(function () {
         $("#main").addClass( gadget.get('place') );
 
         $("#status").html( demo.helloWorld() );
-        
+        $("#status").append("<br/>" + demo.getAccount() );
+        $.when( accounts.view() ).done(function(data) {
+            console.log("Accounts.View:", data);
+            $("#status").append("<br/>" + data.institution);
+        });
+
+        $.when( demo.getPromise() ).done(function(data) {
+            console.log("Promise", data);
+        });
+
     });
 });
 
